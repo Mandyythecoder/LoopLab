@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Search Results - LoopLab{% endblock %}
+{% block content %}
+    <h1>Search Results</h1>
+
+    <form method="GET" action="{% url 'search_sounds' %}">
+        <input type="text" name="query" placeholder="Search sounds..." value="{{ request.GET.query }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <div class="results">
+        {% if sounds %}
+            <ul>
+                {% for sound in sounds %}
+                    <li>
+                        <!-- Directly use the passed preview_url -->
+                        <img src="{{ sound.preview_url }}" alt="{{ sound.name }}">
+                        <h3>{{ sound.name }}</h3>
+                        <p>{{ sound.description }}</p>
+                        <audio controls>
+                            <source src="{{ sound.preview_url }}" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No results found.</p>
+        {% endif %}
+    </div>
+{% endblock %}

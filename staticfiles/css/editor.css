@@ -1,0 +1,98 @@
+
+
+.editor-container {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(241, 196, 15, 0.3);
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+
+.editor-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #f1c40f;
+    margin-bottom: 30px;
+}
+
+.editor-input {
+    margin-bottom: 20px;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background-color: #fff;
+    color: #333;
+}
+
+.waveform {
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(241, 196, 15, 0.2);
+}
+
+.editor-buttons {
+    margin-top: 25px;
+}
+
+.editor-btn {
+    background-color: #f1c40f;
+    color: #141432;
+    padding: 10px 18px;
+    margin: 10px 8px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.editor-btn:hover {
+    background-color: #e1b90e;
+}
+
+.editor-controls {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.editor-controls label {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.editor-controls input[type="range"] {
+    width: 60%;
+    appearance: none;
+    height: 8px;
+    border-radius: 5px;
+    background: #f1c40f;
+    outline: none;
+    transition: background 0.3s;
+}
+
+.editor-controls input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    border: 2px solid #f1c40f;
+}
+
+.editor-controls input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    border: 2px solid #f1c40f;
+}

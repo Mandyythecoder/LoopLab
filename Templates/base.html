@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LoopLab{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/@wavesurfer/regions"></script>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="background-animation"></div>
+
+    <nav class="sidebar collapsed" id="sidebar">
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+        <ul class="nav-links">
+            <li><a href="{% url 'index' %}"><i data-lucide="home" class="icon"></i> <span class="text">Home</span></a></li>
+            <li><a href="{% url 'library' %}"><i data-lucide="music" class="icon"></i> <span class="text">Library</span></a></li>
+            <li><a href="{% url 'editor' %}"><i data-lucide="sliders" class="icon"></i> <span class="text">Editor</span></a></li>
+            <li><a href="{% url 'converter' %}"><i data-lucide="refresh-cw" class="icon"></i> <span class="text">Converter</span></a></li>
+            <li><a href="{% url 'index' %}#contact"><i data-lucide="phone" class="icon"></i> <span class="text">Contact</span></a></li>
+            
+            {% if not user.is_authenticated %}
+            <li><a href="{% url 'login' %}"><i data-lucide="log-in" class="icon"></i> <span class="text">Login</span></a></li>
+            {% else %}
+            <li><a href="{% url 'logout' %}"><i data-lucide="log-out" class="icon"></i> <span class="text">Logout</span></a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="user-profile">
+
+        <span class="username">
+            Welcome, {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}!
+        </span>
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+  
+    
+      
+      
+
+    <script>
+        function toggleMenu() {
+            let sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("collapsed");
+            sidebar.classList.toggle("expanded");
+            localStorage.setItem("sidebarState", sidebar.classList.contains("expanded") ? "expanded" : "collapsed");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let sidebar = document.getElementById("sidebar");
+            let savedState = localStorage.getItem("sidebarState");
+
+            if (savedState === "expanded") {
+                sidebar.classList.add("expanded");
+                sidebar.classList.remove("collapsed");
+            } else {
+                sidebar.classList.add("collapsed");
+                sidebar.classList.remove("expanded");
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</body>
+</html>

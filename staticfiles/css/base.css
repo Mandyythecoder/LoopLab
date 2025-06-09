@@ -1,0 +1,244 @@
+/* ✅ Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Orbitron:wght@400;700&display=swap');
+
+/* ✅ General Styles */
+body {
+    font-family: 'Orbitron', sans-serif;
+    background: #121212;
+    color: #ffffff;
+    margin: 1000;
+    padding: 0;
+    display: flex;
+}
+
+/* ✅ Background Animation */
+.background-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 255, 204, 0.2) 0%, rgba(18, 18, 18, 1) 80%);
+    z-index: -1;
+}
+
+/* ✅ Sidebar Navigation */
+.sidebar {
+    width: 80px;
+    background: rgba(0, 0, 0, 0);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    padding: 10px;
+    transition: width 0.3s ease-in-out, background 0.3s ease-in-out;
+    backdrop-filter: blur(10px);
+    overflow: hidden; /* Prevents layout shifts */
+    z-index: 1000;
+}
+
+.sidebar.expanded {
+    width: 250px;
+}
+
+
+.nav-links {
+    list-style: none;
+    padding: 0;
+}
+
+.nav-links a {
+    display: flex;
+    align-items: center;
+    color: white;
+    padding: 10px;
+    text-decoration: none;
+    transition: opacity 0.3s ease-in-out; /* Smooth icon transition */
+}
+
+.nav-links .text {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s;
+}
+
+.sidebar.expanded .nav-links .text {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    color: #00ffcc;
+    font-size: 20px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    margin-left: 19px;
+}
+.menu-toggle:hover{
+    color: #ffffff;
+}
+
+/* ✅ Sidebar Logo */
+
+
+
+/* ✅ Navigation Links */
+.nav-links {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+.nav-links li {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    transition: color 0.3s, padding 0.3s;
+}
+.nav-links a:hover,
+.nav-links a:hover .icon {
+    box-shadow: none !important; /* No shadow */
+    text-shadow: none !important; /* No glowing effect */
+    filter: none !important; /* No extra filters */
+    outline: none !important; /* No borders */
+    border: none !important; /* No border effects */
+    background: transparent !important; /* No background highlight */
+}
+
+.nav-links a:hover {
+    color: #00ffcc;
+    background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
+    border-radius: 5px;
+    box-shadow: none !important; /* Remove any shadow */
+}
+/* ✅ Ensure Icons Stay Same Size */
+.nav-links .icon {
+    width: 24px !important; /* Set fixed width */
+    height: 24px !important; /* Set fixed height */
+    flex-shrink: 0; /* Prevent shrinking */
+    box-shadow: none !important;
+}
+
+/* ✅ Prevent Icons from Resizing on Expansion */
+.sidebar.expanded .nav-links .icon {
+    width: 24px !important;
+    height: 24px !important;
+}
+
+
+/* ✅ Icon Style */
+.icon {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5;
+    color: #00ffcc;
+    margin-right: 10px;
+    transition: color 0.3s ease-in-out;
+}
+
+.nav-links a:hover .icon {
+
+    box-shadow: none !important; /* Ensure no shadow */
+    filter: none !important; 
+}
+
+
+/* ✅ Hide Text in Collapsed Sidebar */
+.sidebar:not(.expanded) .text {
+    display: none;
+}
+
+/* ✅ Show Text when Sidebar Expands */
+.sidebar.expanded .text {
+    display: inline-block;
+}
+
+/* ✅ Main Content */
+.container {
+    flex-grow: 1;
+    margin-left: 80px;
+    padding: 20px;
+    transition: margin-left 0.3s;
+    
+    /* ✅ Ensure Centering Works */
+    display: flex;
+    justify-content: center;  /* Horizontally center */
+    align-items: center;      /* Vertically center */
+    min-height: 100vh; /* Makes sure it fills the viewport height */
+}
+
+.sidebar.expanded ~ .container {
+    margin-left: 200px;
+}
+.user-profile{
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 2em;
+    font-family: 'Audiowide', sans-serif;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(0, 255, 204, 0.8), 
+                 0 0 30px rgba(0, 255, 204, 0.1); /* Glowing effect */
+    padding: 20px;
+    border-radius: 10px;
+}
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #00ffcc;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    .welcome-user {
+        font-size: 2em;
+    }
+}
+/* Example CSS for sidebar links */
+.sidebar a {
+    display: block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff;  /* Adjust color to match your theme */
+    border-radius: 5px;
+    margin: 10px 0;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar a:hover {
+    background-color: #0056b3; /* Darker color on hover */
+}
+
+/* Custom styles for the login link (optional) */
+.sidebar a[href="{% url 'login' %}"] {
+    background-color: #28a745;  /* Green for Login */
+}
+
+.sidebar a[href="{% url 'login' %}"]:hover {
+    background-color: #218838;  /* Darker green on hover */
+}
+
+
+

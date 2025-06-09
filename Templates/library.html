@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Library - LoopLab{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/library.css' %}">
+
+<div class="library-page">
+    <div class="hero-section">
+        <h1>Find Any Song You Want</h1>
+        <form method="GET" action="{% url 'library' %}" class="search-bar">
+            <input type="text" name="query" placeholder="Search songs..." value="{{ query }}">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    {% if sounds %}
+        <div class="sound-cards-container">
+            <div class="sound-grid">
+                {% for sound in sounds %}
+                    <div class="sound-card">
+                        <h3>{{ sound.name }}</h3>
+
+                        <div class="waveform-container" id="waveform-{{ forloop.counter }}">
+                            <div class="loading-text">Loading...</div>
+                        </div>
+
+                        <p class="timestamp" id="timestamp-{{ forloop.counter }}">0:00 / 0:00</p>
+
+                        <button class="play-button" 
+                                data-audio="{{ sound.preview_url }}" 
+                                data-waveform="waveform-{{ forloop.counter }}" 
+                                data-timestamp="timestamp-{{ forloop.counter }}">
+                            ▶ Play
+                        </button>
+                        <button class="stop-button" data-waveform="waveform-{{ forloop.counter }}">
+                            ⏹ Stop
+                        </button>
+
+                        <div class="action-buttons">
+                            <a href="{{ sound.preview_url }}" class="download-button" id="download-{{ forloop.counter }}" data-name="{{ sound.name }}.mp3">
+                                ⬇ Download
+                            </a>
+                            
+                            <a href="{% url 'editor' %}?sound_url={{ sound.preview_url }}" class="edit-button">
+                                🎛 Edit
+                            </a>
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if sounds.has_other_pages %}
+            <div class="pagination">
+                {% if sounds.has_previous %}
+                    <a href="?query={{ query }}&page={{ sounds.previous_page_number }}" class="page-btn">Previous</a>
+                {% endif %}
+
+                <span class="current-page">Page {{ sounds.number }} of {{ sounds.paginator.num_pages }}</span>
+
+                {% if sounds.has_next %}
+                    <a href="?query={{ query }}&page={{ sounds.next_page_number }}" class="page-btn">Next</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="no-results">
+            <h2>No results found.</h2>
+            <p>Try searching for a different sound.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script src="https://unpkg.com/wavesurfer.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var playButtons = document.querySelectorAll('.play-button');
+        var wavesurfers = {};
+
+        playButtons.forEach(function (button) {
+            var previewUrl = button.getAttribute('data-audio');
+            var waveformId = button.getAttribute('data-waveform');
+            var timestampId = button.getAttribute('data-timestamp');
+            var stopButton = document.querySelector(`.stop-button[data-waveform='${waveformId}']`);
+            var timestamp = document.getElementById(timestampId);
+            var waveformContainer = document.getElementById(waveformId);
+
+            if (previewUrl && waveformContainer) {
+                var wavesurfer = WaveSurfer.create({
+                    container: waveformContainer,
+                    waveColor: '#009688',
+                    progressColor: '#FFA500',
+                    height: 80,
+                    barWidth: 2,
+                    responsive: true,
+                    cursorWidth: 1,
+                });
+
+                wavesurfers[waveformId] = wavesurfer;
+                wavesurfer.load(previewUrl);
+
+                wavesurfer.on('ready', function () {
+                    let totalTime = formatTime(wavesurfer.getDuration());
+                    timestamp.innerText = `0:00 / ${totalTime}`;
+                    waveformContainer.querySelector(".loading-text").style.display = "none";
+                });
+
+                wavesurfer.on('audioprocess', function () {
+                    if (wavesurfer.isPlaying()) {
+                        let currentTime = formatTime(wavesurfer.getCurrentTime());
+                        let totalTime = formatTime(wavesurfer.getDuration());
+                        timestamp.innerText = `${currentTime} / ${totalTime}`;
+                    }
+                });
+
+                button.addEventListener("click", function () {
+                    if (wavesurfer.isPlaying()) {
+                        wavesurfer.pause();
+                        button.innerText = "▶ Play";
+                    } else {
+                        stopAllExcept(waveformId);
+                        wavesurfer.play();
+                        button.innerText = "⏸ Pause";
+                    }
+                });
+
+                stopButton.addEventListener("click", function () {
+                    wavesurfer.stop();
+                    button.innerText = "▶ Play";
+                    timestamp.innerText = `0:00 / ${formatTime(wavesurfer.getDuration())}`;
+                });
+
+                function formatTime(seconds) {
+                    let min = Math.floor(seconds / 60);
+                    let sec = Math.floor(seconds % 60);
+                    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+                }
+
+                function stopAllExcept(currentId) {
+                    for (let key in wavesurfers) {
+                        if (key !== currentId && wavesurfers[key].isPlaying()) {
+                            wavesurfers[key].stop();
+                            let btn = document.querySelector(`.play-button[data-waveform='${key}']`);
+                            if (btn) btn.innerText = "▶ Play";
+                        }
+                    }
+                }
+            }
+        });
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.download-button').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const url = button.getAttribute('href');
+            const filename = button.getAttribute('data-name');
+
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(blobUrl);
+                })
+                .catch(err => {
+                    alert("Failed to download file.");
+                    console.error(err);
+                });
+        });
+    });
+});
+
+
+</script>
+
+{% endblock %}

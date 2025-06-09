@@ -1,0 +1,536 @@
+#prac2.a.1
+# READ DATA FROM CSV file
+import pandas as pd
+
+# Load the dataset
+df = pd.read_csv('Student_Marks.csv')
+
+# Display the dataset
+print("Our dataset:")
+print(df)
+
+#prac2.a.2
+# READ DATA FROM JSON file
+import pandas as pd
+
+# Load the data
+import pandas as pd
+
+data = pd.read_json('sample1.json', orient='index')
+print(data)
+
+# Display the data
+print(data)
+
+
+
+#prac 2b1
+#REPLACING NA VALUES USING FILLNA
+import pandas as pd
+
+# Load the dataset
+df = pd.read_csv('Titanic-Dataset.csv')
+
+# Display the original dataset (first 10 rows)
+print("Original Dataset (first 10 rows):")
+print(df.head(10))
+
+# Fill NA values with 0
+df2 = df.fillna(value=0)
+
+# Display the modified dataset
+print("Dataset after filling NA values with 0:")
+print(df2.head(10))
+
+
+#prac 2b2
+# DROPPING NA VALUES USING dropna()
+import pandas as pd
+
+# Load the dataset
+df = pd.read_csv('Titanic-Dataset.csv')
+
+# Display the original dataset (first 10 rows)
+print("Original Dataset (first 10 rows):")
+print(df.head(10))
+
+# Drop rows with any NA values
+df.dropna(inplace=True)
+
+# Display the dataset after dropping NA values
+print("Dataset after dropping NA values:")
+print(df.head(10))
+
+FILTERING SORTING AND GROUPING DATA
+import pandas as pd
+
+# Load iris dataset
+iris = pd.read_csv('Iris.csv')
+
+# Filtering data: Only samples where Species is 'setosa'
+setosa = iris[iris['Species'] == 'Iris-setosa']
+print("Setosa samples:")
+print(setosa.head())
+
+# Sorting data by SepalLengthCm in descending order
+sorted_iris = iris.sort_values(by='SepalLengthCm', ascending=False)
+print("\nSorted iris dataset (by SepalLengthCm):")
+print(sorted_iris.head())
+
+# Grouping data by Species and calculating mean of numeric columns
+grouped_species = iris.groupby('Species').mean(numeric_only=True)
+print("\nMean measurements for each species:")
+print(grouped_species)
+
+
+PRAC 3
+# STANDARDIZATION NORMALIZATION
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
+# Load dataset (only specific columns)
+df = pd.read_csv('wine.data.csv', header=None, usecols=[0, 1, 2], skiprows=1)
+df.columns = ['classlabel', 'Alcohol', 'Malic Acid']
+
+# Original DataFrame
+print("Original DataFrame:")
+print(df.head())
+
+# Min-Max Normalization
+minmax_scaler = MinMaxScaler()
+df[['Alcohol', 'Malic Acid']] = minmax_scaler.fit_transform(df[['Alcohol', 'Malic Acid']])
+print("\nDataFrame after Min-Max Scaling:")
+print(df.head())
+
+# Standardization (Z-score)
+standard_scaler = StandardScaler()
+df[['Alcohol', 'Malic Acid']] = standard_scaler.fit_transform(df[['Alcohol', 'Malic Acid']])
+print("\nDataFrame after Standard Scaling:")
+print(df.head())
+
+DUMMIFICATION LABEL ENCODING
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+
+# Load the Iris dataset
+iris = pd.read_csv("Iris.csv")
+print("Original Dataset:")
+print(iris.head())
+
+# Apply Label Encoding on 'Species' column
+le = LabelEncoder()
+iris['code'] = le.fit_transform(iris['Species'])
+
+print("\nDataset after Label Encoding:")
+print(iris)
+
+
+PRAC 4
+# TWO SAMPLE T TEST SECTION
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+
+# Set seed for reproducibility
+np.random.seed(42)
+
+# Generate two samples
+sample1 = np.random.normal(loc=10, scale=2, size=30)
+sample2 = np.random.normal(loc=12, scale=2, size=30)
+
+# Perform a two-sample t-test
+t_statistic, p_value = stats.ttest_ind(sample1, sample2)
+
+# Set significance level
+alpha = 0.05
+
+# Print t-test results
+print("Results of Two-Sample t-test:")
+print(f'T-statistic: {t_statistic:.4f}')
+print(f'P-value: {p_value:.4f}')
+print(f"Degrees of Freedom: {len(sample1) + len(sample2) - 2}")
+
+# Plot the distributions
+plt.figure(figsize=(10, 6))
+plt.hist(sample1, alpha=0.5, label='Sample 1', color='blue')
+plt.hist(sample2, alpha=0.5, label='Sample 2', color='orange')
+plt.axvline(np.mean(sample1), color='blue', linestyle='dashed', linewidth=2)
+plt.axvline(np.mean(sample2), color='orange', linestyle='dashed', linewidth=2)
+plt.title('Distributions of Sample 1 and Sample 2')
+plt.xlabel('Values')
+plt.ylabel('Frequency')
+plt.legend()
+
+# Highlight the critical region if null hypothesis is rejected
+if p_value < alpha:
+    critical_region = np.linspace(min(sample1.min(), sample2.min()), max(sample1.max(), sample2.max()), 1000)
+    plt.fill_between(critical_region, 0, 5, color='red', alpha=0.3, label='Critical Region')
+    plt.text(np.mean([sample1.mean(), sample2.mean()]), 5, f'T-statistic: {t_statistic:.2f}', 
+             ha='center', va='center', color='black', backgroundcolor='white')
+
+plt.show()
+
+# Draw conclusions
+if p_value < alpha:
+    print("Conclusion: There is significant evidence to reject the null hypothesis.")
+    if np.mean(sample1) > np.mean(sample2):
+        print("Interpretation: The mean of Sample 1 is significantly higher than that of Sample 2.")
+    else:
+        print("Interpretation: The mean of Sample 2 is significantly higher than that of Sample 1.")
+else:
+    print("Conclusion: Fail to reject the null hypothesis.")
+    print("Interpretation: There is not enough evidence to claim a significant difference between the means.")
+
+#CHI SQUARE TEST
+import pandas as pd
+import seaborn as sb
+import warnings
+from scipy import stats
+
+# Suppress warnings
+warnings.filterwarnings('ignore')
+
+# Load dataset
+df = sb.load_dataset('mpg')
+
+# Print basic stats
+print(df[['horsepower', 'model_year']].describe())
+
+# Categorize horsepower
+bins_hp = [0, 75, 150, 240]
+labels_hp = ['low', 'medium', 'high']
+df['horsepower_new'] = pd.cut(df['horsepower'], bins=bins_hp, labels=labels_hp)
+print("\nHorsepower categories:")
+print(df['horsepower_new'].value_counts())
+
+# Categorize model year
+bins_year = [69, 72, 74, 84]
+labels_year = ['t1', 't2', 't3']
+df['modelyear_new'] = pd.cut(df['model_year'], bins=bins_year, labels=labels_year)
+print("\nModel Year categories:")
+print(df['modelyear_new'].value_counts())
+
+# Create contingency table
+df_chi = pd.crosstab(df['horsepower_new'], df['modelyear_new'])
+print("\nContingency Table:")
+print(df_chi)
+
+# Perform Chi-Square test
+chi2_stat, chi2_p, dof, expected = stats.chi2_contingency(df_chi)
+print("\nChi-Square Test Result:")
+print(f"Chi2 Statistic: {chi2_stat:.4f}")
+print(f"P-value: {chi2_p:.4f}")
+print(f"Degrees of Freedom: {dof}")
+print("Expected Frequencies:")
+print(expected)
+
+PRAC 5 ANOVA
+import pandas as pd
+import scipy.stats as stats
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+# Define groups
+group1 = [23, 25, 29, 34, 30]
+group2 = [19, 20, 22, 24, 25]
+group3 = [15, 18, 20, 21, 17]
+group4 = [28, 24, 26, 30, 29]
+
+# Combine data into a DataFrame
+data = pd.DataFrame({
+    'value': group1 + group2 + group3 + group4,
+    'group': ['Group1'] * len(group1) + 
+             ['Group2'] * len(group2) + 
+             ['Group3'] * len(group3) + 
+             ['Group4'] * len(group4)
+})
+
+# Perform one-way ANOVA
+f_statistics, p_value = stats.f_oneway(group1, group2, group3, group4)
+print("One-Way ANOVA:")
+print("F-statistics:", f_statistics)
+print("p-value:", p_value)
+
+# Perform Tukey-Kramer post-hoc test
+tukey_results = pairwise_tukeyhsd(endog=data['value'], groups=data['group'])
+print("\nTukey-Kramer Post-Hoc Test Results:")
+print(tukey_results)
+
+
+PRAC 6 REGRESSION AND TYPES
+import numpy as np
+import pandas as pd
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load California housing dataset
+housing = fetch_california_housing()
+housing_df = pd.DataFrame(housing.data, columns=housing.feature_names)
+print(housing_df)
+housing_df['PRICE'] = housing.target
+
+# Multiple Linear Regression
+X = housing_df.drop('PRICE', axis=1)
+y = housing_df['PRICE']
+
+# Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Predict using the test set
+y_pred = model.predict(X_test)
+
+# Calculate metrics
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# Print the results
+print("Mean Squared Error:", mse)
+print("R-squared:", r2)
+print("Intercept:", model.intercept_)
+print("Coefficient:", model.coef_)
+
+  #Linear regression                                                                                  
+import pandas as pd
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+import ssl
+
+ssl._create_default_https_context=ssl._create_unverified_context
+housing=fetch_california_housing()
+housing_df=pd.DataFrame(housing.data,columns=housing.feature_names)
+print(housing_df)
+housing_df['PRICE']=housing.target
+
+x=housing_df[['AveRooms']]
+y=housing_df['PRICE']
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=42)
+
+model=LinearRegression()
+model.fit(x_train,y_train)
+
+mse=mean_squared_error(y_test,model.predict(x_test))
+r2=r2_score(y_test,model.predict(x_test))
+print("Mean Square Error:",mse)
+print("R-Squared:",r2)
+print("Intercept:",model.intercept_)
+print("Coefficient:",model.coef_)
+PRAC 7 LOGISTIC REGRESSION AND DECISION TREE
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, classification_report
+
+# Load the Iris dataset
+iris = load_iris()
+iris_df = pd.DataFrame(data=np.c_[iris['data'], iris['target']],
+                       columns=iris['feature_names'] + ['target'])
+
+# Create a binary classification problem (filter out class '2')
+binary_df = iris_df[iris_df['target'] != 2]
+X = binary_df.drop('target', axis=1)
+y = binary_df['target']
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train Logistic Regression
+logistic_model = LogisticRegression()
+logistic_model.fit(X_train, y_train)
+y_pred_logistic = logistic_model.predict(X_test)
+
+# Evaluate Logistic Regression
+print("Logistic Regression Metrics")
+print("Accuracy:", accuracy_score(y_test, y_pred_logistic))
+print("Precision:", precision_score(y_test, y_pred_logistic))
+print("Recall:", recall_score(y_test, y_pred_logistic))
+print("\nClassification Report")
+print(classification_report(y_test, y_pred_logistic))
+
+# Train Decision Tree
+decision_tree_model = DecisionTreeClassifier()
+decision_tree_model.fit(X_train, y_train)
+y_pred_tree = decision_tree_model.predict(X_test)
+
+# Evaluate Decision Tree
+print("\nDecision Tree Metrics")
+print("Accuracy:", accuracy_score(y_test, y_pred_tree))
+print("Precision:", precision_score(y_test, y_pred_tree))
+print("Recall:", recall_score(y_test, y_pred_tree))
+print("\nClassification Report")
+print(classification_report(y_test, y_pred_tree))
+
+
+PRAC 8 K MEANS DATA CLUSTERING
+
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Load the dataset
+data = pd.read_csv("wholesale.csv")
+print(data.head())
+
+# Separate categorical and continuous features
+categorical_features = ['Channel', 'Region']
+continuous_features = ['Fresh', 'Milk', 'Grocery', 'Frozen', 'Detergents_Paper', 'Delicassen']
+
+# Summary of continuous features
+print(data[continuous_features].describe())
+
+# Convert categorical columns into dummy/one-hot variables
+for col in categorical_features:
+    dummies = pd.get_dummies(data[col], prefix=col)
+    data = pd.concat([data, dummies], axis=1)
+    data.drop(col, axis=1, inplace=True)
+
+print(data.head())
+
+# Normalize the data
+mms = MinMaxScaler()
+data_transformed = mms.fit_transform(data)
+
+# Elbow method to determine optimal k
+sum_of_squared_distances = []
+K = range(1, 15)
+
+for k in K:
+    km = KMeans(n_clusters=k, random_state=42)
+    km.fit(data_transformed)
+    sum_of_squared_distances.append(km.inertia_)
+
+# Plotting the Elbow Curve
+plt.plot(K, sum_of_squared_distances, 'bx-')
+plt.xlabel('k')
+plt.ylabel('Sum of Squared Distances')
+plt.title('Elbow Method for Optimal k')
+plt.show()
+
+
+PRAC 9 PCA
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# Load the Iris dataset
+iris = load_iris()
+iris_df = pd.DataFrame(data=np.c_[iris['data'], iris['target']],
+                       columns=iris['feature_names'] + ['target'])
+
+# Split features and target
+X = iris_df.drop('target', axis=1)
+y = iris_df['target']
+
+# Standardize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Apply PCA
+pca = PCA()
+X_pca = pca.fit_transform(X_scaled)
+explained_variance_ratio = pca.explained_variance_ratio_
+
+# Plot cumulative explained variance
+plt.figure(figsize=(8, 6))
+plt.plot(np.cumsum(explained_variance_ratio), marker='o', linestyle='--')
+plt.title('Explained Variance Ratio by Principal Components')
+plt.xlabel('Number of Principal Components')
+plt.ylabel('Cumulative Explained Variance Ratio')
+plt.grid(True)
+plt.show()
+
+# Determine number of components to explain 95% variance
+cumulative_variance_ratio = np.cumsum(explained_variance_ratio)
+n_components = np.argmax(cumulative_variance_ratio >= 0.95) + 1
+print(f"Number of principal components to explain 95% variance: {n_components}")
+
+# Apply PCA again with selected number of components
+pca = PCA(n_components=n_components)
+X_reduced = pca.fit_transform(X_scaled)
+
+# Plot the reduced-dimensional data
+plt.figure(figsize=(8, 6))
+plt.scatter(X_reduced[:, 0], X_reduced[:, 1], c=y, cmap='viridis', s=50, alpha=0.6)
+plt.title('Data in Reduced-dimensional Space')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.colorbar(label='Target')
+plt.show()
+
+
+PRAC 10 DATA VISUALISATION AND STORY TELLING
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+# Set a seed for reproducibility
+np.random.seed(42)
+
+# Create a DataFrame with random data
+data = pd.DataFrame({
+    'variable1': np.random.normal(0, 1, 1000),
+    'variable2': np.random.normal(2, 2, 1000) + 0.5 * np.random.normal(0, 1, 1000),
+    'variable3': np.random.normal(-1, 1.5, 1000),
+    'category': pd.Series(np.random.choice(['A', 'B', 'C', 'D'], size=1000, p=[0.4, 0.3, 0.2, 0.1]),
+                          dtype='category')
+})
+
+# Scatter Plot: Relationship between Variable 1 and Variable 2
+plt.figure(figsize=(10, 6))
+plt.scatter(data['variable1'], data['variable2'], alpha=0.5)
+plt.title('Relationship between Variable 1 and Variable 2', fontsize=16)
+plt.xlabel('Variable 1', fontsize=14)
+plt.ylabel('Variable 2', fontsize=14)
+plt.show()
+
+# Bar Chart: Distribution of Categorical Variable
+plt.figure(figsize=(10, 6))
+sns.countplot(x='category', data=data)
+plt.title('Distribution of Categories', fontsize=16)
+plt.xlabel('Category', fontsize=14)
+plt.ylabel('Count', fontsize=14)
+plt.xticks(rotation=45)
+plt.show()
+
+# Heatmap: Correlation between Numerical Variables
+plt.figure(figsize=(10, 8))
+numerical_cols = ['variable1', 'variable2', 'variable3']
+sns.heatmap(data[numerical_cols].corr(), annot=True, cmap='coolwarm')
+plt.title('Correlation Heatmap', fontsize=16)
+plt.show()
+
+# Data Storytelling Output
+print("Title: Exploring the Relationship between Variable 1 and Variable 2")
+
+print("\nScatter Plot")
+print("Figure 1: The scatter plot shows a moderate relationship between Variable 1 and Variable 2, "
+      "with some spread due to added randomness. The transparency (alpha) helps in visualizing point density.")
+
+print("\nBar Chart")
+print("Figure 2: The bar chart displays the frequency of each category (A, B, C, D). "
+      "Category A is the most common, followed by B, C, and D.")
+
+print("\nHeatmap")
+print("Figure 3: The heatmap shows the correlation between the numerical variables. "
+      "This gives insight into how these variables interact—whether they move together (positive correlation) "
+      "or inversely (negative correlation).")
+
+print("\nConclusion:")
+print("The combination of scatter plots, bar charts, and heatmaps provides a clearer picture of the data. "
+      "This approach allows us to understand relationships between variables, categorical distributions, "
+      "and correlations at a glance.")

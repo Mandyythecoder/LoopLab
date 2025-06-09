@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sound Editor | LoopLab{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/editor.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="editor-container">
+    <h1 class="editor-title">🎵 LOOPLAB SOUND EDITOR</h1>
+    
+    <input type="file" id="audioFile" accept="audio/*" class="editor-input">
+
+    <div id="waveform" class="waveform"></div>
+
+    <div class="editor-buttons">
+        <button class="editor-btn" id="playPause">▶ Play / Pause</button>
+        <button class="editor-btn" id="stop">⏹ Stop</button>
+        <button class="editor-btn" id="exportAudio">⬇ Export Full Audio</button>
+        <button class="editor-btn" onclick="resetChanges()">🔄 Reset</button>
+
+    </div>
+
+    <div class="editor-tools">
+        <label>Pitch (semitones): <span id="pitchValue">0</span></label>
+        <input type="range" id="pitchSlider" min="-12" max="12" value="0" class="slider">
+        
+        <label>Tempo (BPM): <span id="tempoValue">120</span></label>
+        <input type="range" id="tempoSlider" min="60" max="200" value="120" class="slider">
+
+        <button class="editor-btn" onclick="applyChanges()">🎚 Apply Changes</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+
+<script>
+let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let wavesurfer;
+let audioBuffer;
+let audioReady = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: '#f1c40f',
+        progressColor: '#e1b90e',
+        height: 120,
+        responsive: true,
+    });
+
+    document.getElementById('audioFile').addEventListener('change', function (e) {
+        const audioFile = e.target.files[0];
+        if (audioFile) {
+            const fileReader = new FileReader();
+            fileReader.onload = (event) => {
+                wavesurfer.load(URL.createObjectURL(audioFile));
+
+                audioContext.decodeAudioData(event.target.result, (buffer) => {
+                    audioBuffer = buffer;
+                    console.log("🎧 Audio buffer loaded!");
+                });
+            };
+            fileReader.readAsArrayBuffer(audioFile);
+        }
+    });
+
+    wavesurfer.on('ready', () => {
+        audioReady = true;
+        console.log("🎧 Audio is ready to play!");
+    });
+
+    document.getElementById('playPause').addEventListener('click', () => {
+        if (audioReady) {
+            wavesurfer.playPause();
+        } else {
+            alert("⚠️ Please load an audio file first.");
+        }
+    });
+
+    document.getElementById('stop').addEventListener('click', () => wavesurfer.stop());
+
+    document.getElementById('exportAudio').addEventListener('click', exportFullAudio);
+});
+
+function exportFullAudio() {
+    if (!audioBuffer) {
+        alert("⚠️ Load an audio file first!");
+        return;
+    }
+
+    const duration = audioBuffer.duration;
+    const sampleRate = audioBuffer.sampleRate;
+
+    const offlineContext = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
+
+    const source = offlineContext.createBufferSource();
+    source.buffer = audioBuffer;
+
+    const pitchSemitones = parseInt(document.getElementById("pitchSlider").value);
+    const tempoBPM = parseInt(document.getElementById("tempoSlider").value);
+
+    const pitchRatio = Math.pow(2, pitchSemitones / 12);
+    const tempoRatio = tempoBPM / 120;
+    const finalRate = pitchRatio * tempoRatio;
+
+    source.playbackRate.value = finalRate;
+
+    source.connect(offlineContext.destination);
+    source.start(0);
+
+    offlineContext.startRendering().then(renderedBuffer => {
+        const wavBlob = bufferToWave(renderedBuffer);
+        const url = URL.createObjectURL(wavBlob);
+
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'looplab_export.wav';
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        console.log("📦 Exported full audio!");
+    }).catch(err => {
+        console.error("❌ Rendering failed:", err);
+    });
+}
+
+function bufferToWave(abuffer) {
+    const numOfChan = abuffer.numberOfChannels,
+          length = abuffer.length * numOfChan * 2 + 44,
+          buffer = new ArrayBuffer(length),
+          view = new DataView(buffer),
+          channels = [],
+          sampleRate = abuffer.sampleRate;
+
+    let offset = 0;
+
+    function writeString(str) {
+        for (let i = 0; i < str.length; i++) {
+            view.setUint8(offset + i, str.charCodeAt(i));
+        }
+        offset += str.length;
+    }
+
+    function floatTo16BitPCM(output, offset, input) {
+        for (let i = 0; i < input.length; i++, offset += 2) {
+            let s = Math.max(-1, Math.min(1, input[i]));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+    }
+
+    writeString('RIFF');
+    view.setUint32(offset, length - 8, true); offset += 4;
+    writeString('WAVE');
+    writeString('fmt ');
+    view.setUint32(offset, 16, true); offset += 4;
+    view.setUint16(offset, 1, true); offset += 2;
+    view.setUint16(offset, numOfChan, true); offset += 2;
+    view.setUint32(offset, sampleRate, true); offset += 4;
+    view.setUint32(offset, sampleRate * numOfChan * 2, true); offset += 4;
+    view.setUint16(offset, numOfChan * 2, true); offset += 2;
+    view.setUint16(offset, 16, true); offset += 2;
+    writeString('data');
+    view.setUint32(offset, abuffer.length * numOfChan * 2, true); offset += 4;
+
+    for (let i = 0; i < numOfChan; i++) {
+        floatTo16BitPCM(view, offset, abuffer.getChannelData(i));
+        offset += abuffer.length * 2;
+    }
+
+    return new Blob([view], { type: 'audio/wav' });
+}
+
+async function applyChanges() {
+    if (!audioReady) {
+        alert("⚠️ Please load an audio file first.");
+        return;
+    }
+
+    try {
+        const pitchSemitones = parseInt(document.getElementById("pitchSlider").value);
+        const tempoBPM = parseInt(document.getElementById("tempoSlider").value);
+
+        document.getElementById("pitchValue").textContent = pitchSemitones;
+        document.getElementById("tempoValue").textContent = tempoBPM;
+
+        const pitchRatio = Math.pow(2, pitchSemitones / 12);
+        const tempoRatio = tempoBPM / 120;
+        const finalRate = pitchRatio * tempoRatio;
+
+        wavesurfer.setPlaybackRate(finalRate);
+        console.log("🎚 PlaybackRate set to:", finalRate.toFixed(2));
+    } catch (error) {
+        console.error("Error applying changes:", error);
+        alert("⚠️ Could not apply changes. Try reloading the audio.");
+    }
+}
+
+document.getElementById('pitchSlider').addEventListener('input', function() {
+    document.getElementById('pitchValue').textContent = this.value;
+});
+
+document.getElementById('tempoSlider').addEventListener('input', function() {
+    document.getElementById('tempoValue').textContent = this.value;
+});
+function resetChanges() {
+    document.getElementById("pitchSlider").value = 0;
+    document.getElementById("tempoSlider").value = 120;
+    document.getElementById("pitchValue").textContent = 0;
+    document.getElementById("tempoValue").textContent = 120;
+
+    if (wavesurfer) {
+        wavesurfer.setPlaybackRate(1.0);
+        console.log("🔄 Reset pitch and tempo to default");
+    }
+}
+</script>
+{% endblock %}

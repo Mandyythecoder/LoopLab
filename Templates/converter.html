@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Converter - LoopLab{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/converter.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="converter-container">
+    <h1 class="converter-title">🎧 YouTube to MP3 Converter</h1>
+
+    <form method="post" class="converter-form" onsubmit="showSpinner()">
+        {% csrf_token %}
+        <input type="url" name="youtube_url" placeholder="Paste YouTube link here..." required>
+        <button type="submit">Convert</button>
+    </form>
+    <div class="progress-container" id="progressContainer" style="display: none;">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+   
+
+    {% if mp3_url %}
+    <div class="conversion-success">
+        <a href="{{ mp3_url }}" download>
+            <button class="download-btn">⬇️ Download MP3</button>
+        </a>
+    </div>
+
+    {% elif error %}
+        <p class="error-msg">⚠️ {{ error }}</p>
+    {% endif %}
+
+</div>
+
+<script>
+    document.querySelector(".converter-form").addEventListener("submit", function () {
+        const progressContainer = document.getElementById("progressContainer");
+        const progressBar = document.getElementById("progressBar");
+
+        progressContainer.style.display = "block";
+
+        let width = 0;
+        const simulateProgress = setInterval(() => {
+            if (width >= 90) {
+                clearInterval(simulateProgress);
+            } else {
+                width += 1;
+                progressBar.style.width = width + "%";
+            }
+        }, 50);
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoopLab - Home</title>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+</head>
+<body>
+    <div class="background-animation"></div>
+
+    <nav class="sidebar collapsed" id="sidebar">
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    
+        <ul class="nav-links">
+            <li><a href="{% url 'index' %}"><i data-lucide="home" class="icon"></i> <span class="text">Home</span></a></li>
+            <li><a href="{% url 'library' %}"><i data-lucide="music" class="icon"></i> <span class="text">Library</span></a></li>
+            <li><a href="{% url 'editor' %}"><i data-lucide="sliders" class="icon"></i> <span class="text">Editor</span></a></li>
+            <li><a href="{% url 'converter' %}"><i data-lucide="refresh-cw" class="icon"></i> <span class="text">Converter</span></a></li>
+            <li><a href="#contact"><i data-lucide="phone" class="icon"></i> <span class="text">Contact</span></a></li>
+            {% if not user.is_authenticated %}
+            <li><a href="{% url 'login' %}"><i data-lucide="log-in" class="icon"></i> <span class="text">Login</span></a></li>
+            {% else %}
+            <li><a href="{% url 'logout' %}"><i data-lucide="log-out" class="icon"></i> <span class="text">Logout</span></a></li>
+            {% endif %}
+        </ul>
+        
+    </nav>
+    <div class="user-profile">
+        <span class="username">
+            Welcome, {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}!
+        </span>
+    </div>
+    
+   
+
+    <div class="container" id="main-content">
+        <section class="hero">
+            <div class="hero-logo">
+                <img src="{% static 'images/looplab_logo1.png' %}" alt="LoopLab Logo">
+            </div>
+            
+            <p style="margin-right: 50px; margin-top: 20px;">Discover, Edit & Download Music</p>
+            <div class="search-container">
+                <form id="searchForm" method="GET">
+                    <input type="text" class="search-bar" name="q" placeholder="Search music" />
+                </form>
+            </div>
+            
+            <div class="hero-buttons">
+                <a href="{% url 'library' %}">
+                    <button class="explore-btn">🎧 Explore Library</button>
+                </a>
+                <a href="{% url 'editor' %}">
+                    <button class="upload-btn">Edit your music</button>
+                </a>
+                
+                
+            </div>
+        </section>
+
+        
+
+<section class="about-looplab">
+    <h2> What is LoopLab?</h2>
+    <p>LoopLab is your ultimate music platform for discovering, editing, and downloading high-quality sounds.</p>
+</section>
+
+<section class="why-looplab">
+    <h2>Why Choose LoopLab?</h2>
+    <div class="features">
+        <div class="feature">🎼 <strong>Extensive Sound Library</strong> - Thousands of free & premium loops.</div>
+        <div class="feature">🎚️ <strong>Advanced Editor</strong> - Modify pitch, scale, and tempo with ease.</div>
+        <div class="feature">🔗 <strong>YouTube to MP3</strong> - Convert videos into music.</div>
+       
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2> How It Works</h2>
+    <div class="steps">
+        <div class="step">🔍 <strong>Browse</strong> - Find loops and tracks.</div>
+        <div class="step">🎧 <strong>Edit</strong> - Adjust tempo, pitch, and effects.</div>
+        <div class="step">📥 <strong>Download</strong> - Use your music anywhere.</div>
+    </div>
+</section>
+
+<section class="join-community">
+    <h2>🌎 Join the LoopLab Community</h2>
+    <p>Connect with other music creators, share your tracks, and grow together.</p>
+    <button class="join-btn">Join Now</button>
+</section>
+<div id="loginPopup" class="login-popup">
+    <div class="login-popup-content">
+      <iframe src="{% url 'login' %}" frameborder="0"></iframe>
+      <button onclick="closeLoginPopup()">Close</button>
+    </div>
+  </div>
+
+  <footer id="contact" class="site-footer">
+    <div class="footer-container">
+      <div class="footer-text">
+        <p>🎧 LoopLab - Where Creativity Meets Sound</p>
+        <p>📧 Contact: <a href="mailto:mandaradkar27@gmail.com">mandaradkar27@gmail.com</a></p>
+        <p>📍 Location: Mumbai, India</p>
+      </div>
+    </div>
+  </footer>
+    <script>
+       function toggleMenu() {
+        let sidebar = document.getElementById("sidebar");
+        let mainContent = document.getElementById("main-content");
+
+        sidebar.classList.toggle("expanded");
+
+        let computedStyle = window.getComputedStyle(mainContent);
+        let backgroundColor = computedStyle.backgroundColor;
+
+        if (sidebar.classList.contains("expanded")) {
+            setTimeout(() => {
+                sidebar.style.background = backgroundColor;
+            }, 100);
+        } else {
+            sidebar.style.background = "rgba(0, 0, 0, 0)";
+        }
+    }
+    </script>
+    <script>
+        lucide.createIcons();
+    </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const isAuthenticated = "{{ is_authenticated|yesno:'true,false' }}" === "true";
+        const searchForm = document.getElementById("searchForm");
+        const searchBar = document.querySelector(".search-bar");
+
+        searchForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const query = searchBar?.value.trim();
+
+            if (!isAuthenticated) {
+                window.location.href = `/login/?next=/library/?q=${encodeURIComponent(query)}`;
+            } else {
+                window.location.href = `/library/?q=${encodeURIComponent(query)}`;
+            }
+        });
+    });
+</script>
+    
+</body>
+</html>
