@@ -31,5 +31,5 @@ Tech Stack
 
  Clone the repo
 ```bash
-git clone https://github.com/Mandyythecode/looplab.git
+git clone https://github.com/Mandyythecoder/looplab.git
 cd looplab
